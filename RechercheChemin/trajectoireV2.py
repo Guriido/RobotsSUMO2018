@@ -68,21 +68,41 @@ class Trajectoire :
             (x, y) = coor
             beachbotsForest.forest[x][y] = -8
 
-        beachbotsForest.displayForest()
+        #beachbotsForest.displayForest()
         
         return wolo
 		
-	def estCeUnRobot(self, distance, capteur) :
+    def estCeUnRobot(self, distance, capteur) :
 		
+        coordRepere = getCoord(self.position[0], self.position[1],13.5)
+        if(capteur == 0) :
+            coordRepere = getCoord(coordRepere, self.position[1]-(math.pi / 2),13.5)
+        else :
+            coordRepere = getCoord(coordRepere, self.position[1]+(math.pi / 2),13.5)
+        coordRepere = getCoord(coordRepere, self.position[1],distance)
 		
+        return (beachbotsForest.forest[int(coordRepere[0])][int(coordRepere[1])] > 0)
+			
+    def poseUnRobot(self, distance, capteur) :
+	    
+        coordRepere = getCoord(self.position[0], self.position[1],13.5)
+        if(capteur == 0) :
+            coordRepere = getCoord(coordRepere, self.position[1]-(math.pi / 2),13.5)
+        else :
+            coordRepere = getCoord(coordRepere, self.position[1]+(math.pi / 2),13.5)
+        coordRepere = getCoord(coordRepere, self.position[1],distance + 19)
+        coordRepere = [int(coordRepere[0]),int(coordRepere[1])]
+		
+        beachbotsForest.popCircle(coordRepere, 19, -2)
+	
+
 
 #beachbotsForest.displayForest()
 
 traj = Trajectoire((70, 30), 0, True)
-
+print traj.estCeUnRobot(80, 0)
+traj.poseUnRobot(20,0)
+beachbotsForest.displayForest()
 pouet = traj.vaVoirLaBasSiJySuis((70, 270))
 
 print pouet
-
-
-    

@@ -64,3 +64,13 @@ def isInPolygon(A, L) :
         minAngle = min(minAngle, a)
     return maxAngle - minAngle >= math.pi
 
+def getCoord(coorInit, angle, distance) :
+	
+	
+	deltaX = distance*math.sin(angle)
+	deltaY = distance*math.cos(angle)
+	coor = [coorInit[0], coorInit[1]]
+	coor[0] += deltaX
+	coor[1] += deltaY
+	return coor
+
