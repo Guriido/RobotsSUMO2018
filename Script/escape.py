@@ -9,3 +9,5 @@
 # itinéraire d'évitement (liste de coordonnées)
 
 
+from trajectoireV2 import *
+

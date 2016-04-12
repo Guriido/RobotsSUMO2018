@@ -27,46 +27,17 @@ beachbotsForest.popRectangle((0,80),(20,83),0)
 
 beachbotsForest.popRectangle((0,217),(20,220),0)
 
+# plage
+
+beachbotsForest.popRectangle((75,90),(78,210),0)
+
+beachbotsForest.popRectangle((78,148),(135,153),0)
 
 
-# # départ 1
 
-# beachbotsForest.popRectangle((16,0),(16,8),0)
-
-# beachbotsForest.popRectangle((24,0),(24,8),0)
-
-# beachbotsForest.popRectangle((16,0),(24,1),0)
-
-# # popcorn
-
-# beachbotsForest.popRectangle((0,5),(2,7),0)
-
-# beachbotsForest.popRectangle((0,11),(2,13),0)
-
-# beachbotsForest.popRectangle((0,47),(2,49),0)
-
-# beachbotsForest.popRectangle((0,53),(2,55),0)
-
-# # marches
-
-# beachbotsForest.popRectangle((0,19),(12,41),0)
-
-# # estrade
-
-# beachbotsForest.popRectangle((38,24),(40,36),0)
-
-# # départ 2
-
-# beachbotsForest.popRectangle((16,52),(16,60),0)
-
-# beachbotsForest.popRectangle((24,52),(24,60),0)
-
-# beachbotsForest.popRectangle((16,59),(24,60),0)
+beachbotsForest.enlargeYourPenis(20, -1)
 
 
-# beachbotsForest.enlargeYourPenis(3, -1)
-
-
-beachbotsForest.displayForest()
+#beachbotsForest.displayForest()
 
 
