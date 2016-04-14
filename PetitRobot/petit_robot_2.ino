@@ -22,8 +22,8 @@ void setup() {
   pinMode(selCotePin, INPUT);
   pinMode(startPin, INPUT);
 
-  /*captGauche.set_capteur();
-  captDroite.set_capteur();*/
+  captGauche.set_capteur();
+  captDroite.set_capteur();
 
   bool start = digitalRead (startPin);
   digitalWrite (sleepPinGauche, LOW);
@@ -39,31 +39,27 @@ void setup() {
   int cote = digitalRead (selCotePin);
   if (cote == 0) { //cote gauche
     ligneDroite(96, true);
-    quartDeTour(true);
-    ligneDroite(456, true);
-    ligneDroiteSansCapteur(300, true);
-    ligneDroiteSansCapteur(91, false);
     quartDeTour(false);
-    ligneDroite(273, true);
+    ligneDroite(756, false);
+    ligneDroite(91, true);
     quartDeTour(true);
-    ligneDroite(125, true);
-    ligneDroiteSansCapteur(300, true);
-    ligneDroiteSansCapteur(90, false);
+    ligneDroite(273, true);
+    quartDeTour(false);
+    ligneDroite(425, false);
+    ligneDroite(90, true);
 
   }
 
   else { //cote droit
     ligneDroite(96, true);
-    quartDeTour(false);
-    ligneDroite(456, true);
-    ligneDroiteSansCapteur(300, true);
-    ligneDroiteSansCapteur(91, false);
     quartDeTour(true);
-    ligneDroite(273, true);
+    ligneDroite(756, false);
+    ligneDroite(91, true);
     quartDeTour(false);
-    ligneDroite(125, true);
-    ligneDroiteSansCapteur(300, true);
-    ligneDroiteSansCapteur(90, false);
+    ligneDroite(273, true);
+    quartDeTour(true);
+    ligneDroite(425, false);
+    ligneDroite(90, true);
 
   }
 }
@@ -83,10 +79,12 @@ void ligneDroite(int nbrSteps, bool dir) { //dir=true => on avance
     delayMicroseconds(2000);
     digitalWrite(stepperPinDroite, LOW);
     digitalWrite(stepperPinGauche, LOW);
-    delayMicroseconds(1000);
-    while ( (captGauche.get_distance() < 100) && (captDroite.get_distance() < 100)) {
-      1 + 1;
+    while ( (captGauche.get_distance() < 10) && (captDroite.get_distance() < 10)) {
+      digitalWrite (sleepPinGauche, LOW);
+      digitalWrite (sleepPinDroite, LOW);
     }
+    digitalWrite (sleepPinGauche, HIGH);
+    digitalWrite (sleepPinDroite, HIGH);
   }
 }
 
@@ -108,7 +106,7 @@ void quartDeTour(bool sensTrigo) {
   digitalWrite(dirPinDroite, sensTrigo);
   digitalWrite(dirPinGauche, sensTrigo);
   delay(50);
-  for (int i = 0; i < 125; i++) {
+  for (int i = 0; i < 120; i++) {
     digitalWrite(stepperPinDroite, HIGH);
     digitalWrite(stepperPinGauche, HIGH);
     delayMicroseconds(2000);
