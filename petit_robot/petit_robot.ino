@@ -126,5 +126,8 @@ void quartDeTour(bool sensTrigo) {
   }
 }
 
+void ouvertureDuParasol() {
+  
+}
 
 
