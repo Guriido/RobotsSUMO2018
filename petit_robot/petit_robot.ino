@@ -9,6 +9,8 @@ int sleepPinDroite = 21;
 int selCotePin = 18;
 int startPin = 17;
 
+int distSeuil = 10;
+
 Capteur_ultrason captGauche(2, 3);
 Capteur_ultrason captDroite (4, 5);
 
@@ -73,18 +75,26 @@ void ligneDroite(int nbrSteps, bool dir) { //dir=true => on avance
   digitalWrite(dirPinDroite, dir);
   digitalWrite(dirPinGauche, not dir);
   delay(50);
+  int stepCapt = 0;
   for (int i = 0; i < nbrSteps; i++) {
     digitalWrite(stepperPinDroite, HIGH);
     digitalWrite(stepperPinGauche, HIGH);
     delayMicroseconds(2000);
     digitalWrite(stepperPinDroite, LOW);
     digitalWrite(stepperPinGauche, LOW);
-    while ( (captGauche.get_distance() < 10) && (captDroite.get_distance() < 10)) {
-      digitalWrite (sleepPinGauche, LOW);
-      digitalWrite (sleepPinDroite, LOW);
+    if ( stepCapt % 5 == 0) {
+      while ( ((captGauche.get_distance() < distSeuil) || (captDroite.get_distance() < distSeuil)) /*&& dir*/) {
+        digitalWrite (sleepPinGauche, LOW);
+        digitalWrite (sleepPinDroite, LOW);
+      }
+    }
+    else {
+      delayMicroseconds (1000);
     }
     digitalWrite (sleepPinGauche, HIGH);
     digitalWrite (sleepPinDroite, HIGH);
+    delayMicroseconds(2000);
+    stepCapt += 1;
   }
 }
 
