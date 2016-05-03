@@ -82,9 +82,9 @@ pack = pickle.load(open('waypoints.txt','r'))
 side = pack[0]
 waypoints = pack[1]
 
-rX,rY,_ = waypoints[0]
+rX,rY = waypoints[0][:2]
 
-if(side == 'g')
+if(side == 'g'):
     rAngle = 0
 else:
     rAngle = pi
@@ -92,6 +92,8 @@ else:
 del waypoints[0]
 
 cmdAC = ['f','t','o']
+
+poissonsDeploye = False
 
 numConfigOK.wait(5)
 print arduinoAC.configPalets
@@ -102,7 +104,7 @@ timer.start()
 
 try:
 
-    for (x,y,m) in waypoints:
+    for (x,y,m,f) in waypoints:
         print "Waypoint (" + str(x) + " " + str(y) + ")"
     
         arduinoAC.write(cmdAC[m])    
@@ -132,6 +134,13 @@ try:
             c = serBR.read(1)
             if(c == 'k'):
 	        break
+            
+        if f == 1 and not poissonsDeploye :
+            arduinoAC.write('p')
+            poissonsDeploye = True
+        elif f == 0 and poissonsDeploye :
+            arduinoAC.write('q')
+            poissonsDeploye = False
         
         rX,rY = x,y
         rAngle += angle

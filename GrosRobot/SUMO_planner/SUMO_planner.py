@@ -56,6 +56,7 @@ class Map(Widget):
         self.side = 'g'
         self.armMode = 0
         self.progress = 0
+        self.fishMode = 0
         
         self.rX, self.rY = 0,0
         self.rAngle = 0
@@ -200,9 +201,11 @@ class Map(Widget):
         elif keycode[1] == 't':
             self.armMode = (self.armMode + 1) % 3
             if(len(self.waypoints) > 0):
-                self.waypoints[-1] = (self.waypoints[-1][0], self.waypoints[-1][1], self.armMode)
+                self.waypoints[-1] = (self.waypoints[-1][0], self.waypoints[-1][1], self.armMode, self.fishMode)
         elif keycode[1] == 'up':
             self.moveRobot(FORWARD)
+        elif keycode[1] == 'p':
+            self.fishMode = 1 - self.fishMode
             
         self.drawCanvas()
         return True
@@ -220,7 +223,7 @@ class Map(Widget):
             
             # Les waypoints
             first = True
-            for (x,y,m) in self.waypoints:
+            for (x,y,m,f) in self.waypoints:
                 x *= IMG_W / 3000.0
                 y *= IMG_H / 2000.0
                 
@@ -245,6 +248,12 @@ class Map(Widget):
                         
                 Line(circle=(x, y, 7), width=2)
                 lastPt = [x,y]
+                
+                # Indicateur poisson
+                if f == 1:
+                    Color(0, 0, 0)
+                    Line(circle=(x, y, 12), width=2)
+            
             
             # Dessin de la silhouette du robot
 
@@ -297,7 +306,7 @@ class Map(Widget):
         x = x+DX/2 - (x+DX/2)%DX
         y = y+DY/2 - (y+DY/2)%DY
         
-        self.waypoints.append((int(x), int(y), self.armMode))
+        self.waypoints.append((int(x), int(y), self.armMode, self.fishMode))
         #print self.waypoints
         
         
