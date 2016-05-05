@@ -14,7 +14,7 @@ void Capteur_ultrason::set_capteur()
     digitalWrite(m_pin_trig, LOW);  
 }
 
-int Capteur_ultrason::get_distance()
+float Capteur_ultrason::get_distance()
 {
  // 1. Un état haut de 10 microsecondes est mis sur la broche "Trig"
    digitalWrite(m_pin_trig, HIGH);
@@ -29,6 +29,7 @@ int Capteur_ultrason::get_distance()
    {
       // si la durée est supérieure à 30ms, l'onde est perdue
       return 1000;
+
    }
    else
    {

@@ -1,7 +1,7 @@
 #ifndef MotorBlock_h
 #define MotorBlock_h
 
-#define OFFSET 10
+#define OFFSET 15
       
 class MotorBlock
 {

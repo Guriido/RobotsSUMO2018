@@ -10,7 +10,11 @@
 
 Capteur_ultrason ultrasonL(10,11);
 Capteur_ultrason ultrasonR(12,13);
+Capteur_ultrason ultrasonB(8,9);
 SimpleTimer timerUltrason;
+float lastL = 0.0;
+float lastR = 0.0;
+float lastB = 0.0;
 
 boolean chronoFini = false;
 
@@ -54,6 +58,7 @@ void setup() {
 
   ultrasonL.set_capteur();
   ultrasonR.set_capteur();
+  ultrasonB.set_capteur();
   timerUltrason.setInterval(100, pingUltrason);
 }
 
@@ -63,7 +68,7 @@ void loop() {
 
   if(waitingStart && digitalRead(4) == LOW){
     waitingStart = false;
-    Serial.println('g');
+    Serial.println('m');
   }
 
   char c = -1;
@@ -153,18 +158,35 @@ void loop() {
   }
 
 }
-
 void pingUltrason() {
-  if((ultrasonL.get_distance() < 10 || ultrasonR.get_distance() < 10)) {
+  float dL=ultrasonL.get_distance();
+  delayMicroseconds(100);
+  float dR=ultrasonR.get_distance();
+  delayMicroseconds(100);
+  float dB=ultrasonB.get_distance();
+  
+  float meanL = (lastL + dL) / 2.0;
+  float meanR = (lastR + dR) / 2.0;
+  float meanB = (lastB + dB) / 2.0;
+  
+  lastL = dL;
+  lastR = dR;
+  lastB = dB;
+  
+  //Serial.println(String((long)(meanL))+" "+String((long)(meanR))+" "+String((long)(meanB)));
+  
+  
+  if((dL < 25 || dR < 25 || dB < 10)) {
     if(!obstacle){
       Serial.print('x');
       obstacle = true;
     }
   }
   else{
-    if(obstacle)
+    if(obstacle){
       Serial.print('o');
-    obstacle = false;
+      obstacle = false;
+    }
   }
 }
 

@@ -53,13 +53,13 @@ boolean linCommand() {
     float d_lin = M_R.encoderPos + M_L.encoderPos;
 
     if(dst >= linTarget * (4.0/5.0)) {
-      float vit = max(linTarget - dst, 0.0) * 5.0 * 0.58 / linTarget + 0.22; // Commande en trapèze FTW
-      M_L.run(-vit * linDir - d_lin/1400.0);
-      M_R.run(vit * linDir - d_lin/1400.0);
+      float vit = max(linTarget - dst, 0.0) * 5.0 * 0.56 / linTarget + 0.24; // Commande en trapèze FTW
+      M_L.run(-vit * linDir - d_lin/1600.0);
+      M_R.run(vit * linDir - d_lin/1600.0);
     } 
     else {
-      M_L.run(-0.8 * linDir - d_lin/1400.0);
-      M_R.run(0.8 * linDir - d_lin/1400.0);
+      M_L.run(-0.8 * linDir - d_lin/1600.0);
+      M_R.run(0.8 * linDir - d_lin/1600.0);
     }
     return false;
   } 
