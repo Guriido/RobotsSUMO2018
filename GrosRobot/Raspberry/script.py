@@ -34,24 +34,28 @@ class ArduinoAC(Thread):
 	Thread.__init__(self)
 	self.end = False
 	self.configPalets = 1
+	self.side = 'g'
 
     def run(self):
 	
 	while(not self.end):
 	    with mutexAC:
 	        c = serAC.read(1)
-	    if(c == 'x' or c == 'o'):
-		with mutexBR:
-		    serBR.write('b' + c + '         e')
-		    print 'OBSTACLE : ' + c
+	        
+                if(c == 'x' or c == 'o'):
+                    with mutexBR:
+                        serBR.write('b' + c + '         e')
+                        print 'OBSTACLE : ' + c
 
-	    elif(c == 'g'):
-		start.set()
-	    elif(c in '12345' and c != ''):
-		self.configPalets = int(c)
-		numConfigOK.set()
+                elif(c == 'm'):
+                    start.set()
+                elif(c in '12345' and c != ''):
+                    self.configPalets = int(c)
+                    c = serAC.read(1)
+                    self.side = c
+                    numConfigOK.set()
 
-	    time.sleep(0.1)
+                time.sleep(0.1)
 
     def quit(self):
 	self.end = True
@@ -72,19 +76,20 @@ def normalizeAngle(angle):
 
 arduinoAC = ArduinoAC()
 arduinoAC.start()
-time.sleep(2)
+time.sleep(3)
 
 arduinoAC.write('r') # On demande la config des palets
 
-
+numConfigOK.wait(5)
+print arduinoAC.configPalets
+print arduinoAC.side
  
 pack = pickle.load(open('waypoints.txt','r'))
-side = pack[0]
 waypoints = pack[1]
 
 rX,rY = waypoints[0][:2]
 
-if(side == 'g'):
+if(arduinoAC.side == 'g'):
     rAngle = 0
 else:
     rAngle = pi
@@ -95,11 +100,10 @@ cmdAC = ['f','t','o']
 
 poissonsDeploye = False
 
-numConfigOK.wait(5)
-print arduinoAC.configPalets
+
 start.wait()
 
-timer = Timer(20.0, stopEverything)
+timer = Timer(90.0, stopEverything)
 timer.start()
 
 try:
