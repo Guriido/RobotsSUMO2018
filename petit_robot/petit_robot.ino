@@ -13,7 +13,7 @@ int sleepPinDroite = 21;
 int selCotePin = 18;
 int startPin = 17;
 
-int distSeuil = 10; //distance min avant l'aret de robot
+int distSeuil = 10; //distance min avant l'aret de robot en cm
 
 //variables pour le declanchement du parasol
 bool parasolFerme;
@@ -22,6 +22,7 @@ double tempsZero;
 //Declaration des capteur ultrason
 Capteur_ultrason captGauche(2, 3);
 Capteur_ultrason captDroite (4, 5);
+Capteur_ultrason captArriere (6, 7);
 
 //Declaration du servo moteur du parasol
 Servo servoParasol;
@@ -43,6 +44,7 @@ void setup() {
   //Initialisation des capteurs ultrason
   captGauche.set_capteur();
   captDroite.set_capteur();
+  captArriere.set_capteur();
 
   //Attente du signal de demarrage
   bool start = digitalRead (startPin);
@@ -65,29 +67,11 @@ void setup() {
   //Lancement du deplacemnt pour aller fermer les portes
   int cote = digitalRead (selCotePin);
   if (cote == 0) { //cote gauche
-    ligneDroite(96, true);
-    quartDeTour(false);
-    ligneDroite(756, false);
-    ligneDroite(91, true);
-    quartDeTour(true);
-    ligneDroite(273, true);
-    quartDeTour(false);
-    ligneDroite(425, false);
-    ligneDroite(90, true);
-
+    coteGauche();
   }
 
   else { //cote droit
-    ligneDroite(96, true);
-    quartDeTour(true);
-    ligneDroite(756, false);
-    ligneDroite(91, true);
-    quartDeTour(false);
-    ligneDroite(273, true);
-    quartDeTour(true);
-    ligneDroite(425, false);
-    ligneDroite(90, true);
-
+    coteDroit();
   }
 
   //Une fois que le robot a ferme les portes on attend la fin des 90 secondes
@@ -98,13 +82,13 @@ void setup() {
 
 
 
-  while (millis() - tempsZero <  90000) {
+  while (millis() - tempsZero <  92000) {
     digitalWrite (sleepPinGauche, LOW);
     digitalWrite (sleepPinDroite, LOW);
   }
 
   //Declaration de la pin du servo du parasol
-  servoParasol.attach(7);
+  servoParasol.attach(8);
   ouvertureDuParasol();
 }
 
@@ -115,11 +99,7 @@ void loop () {
 }
 
 
-
-
-
-
-void ligneDroite(int nbrSteps, bool dir) { //dir=true => on avance
+void ligneDroite(int nbrSteps, bool dir, bool capt) { //dir=true => on avance
   digitalWrite(dirPinDroite, dir);
   digitalWrite(dirPinGauche, not dir);
   delay(50);
@@ -133,21 +113,16 @@ void ligneDroite(int nbrSteps, bool dir) { //dir=true => on avance
     digitalWrite(stepperPinGauche, LOW);
     delayMicroseconds(2000);
 
-    if (millis() - decomptCapteur > 100) {
-      if (dir) {
-        while ((captGauche.get_distance() < 10 || captDroite.get_distance() < 10)) {
-          digitalWrite (sleepPinGauche, LOW);
-          digitalWrite (sleepPinDroite, LOW);
-        }
+    if (capt) {
+      if (millis() - decomptCapteur > 300) {
+        pingCapteurs(dir);
+        decomptCapteur = millis();
       }
-      decomptCapteur = millis();
+      digitalWrite (sleepPinGauche, HIGH);
+      digitalWrite (sleepPinDroite, HIGH);
     }
-    digitalWrite (sleepPinGauche, HIGH);
-    digitalWrite (sleepPinDroite, HIGH);
   }
 }
-
-
 
 void quartDeTour(bool sensTrigo) {
   digitalWrite(dirPinDroite, sensTrigo);
@@ -164,7 +139,37 @@ void quartDeTour(bool sensTrigo) {
 }
 
 
+void fermerPorte() {
+  
+}
 
+void coteGauche() {
+  ligneDroite(96, true, true);
+  quartDeTour(true);
+  ligneDroite(356, true, true);
+  ligneDroite (400, true, false);
+  ligneDroite(91, false, true);
+  quartDeTour(false);
+  ligneDroite(278, true, true);
+  quartDeTour(true);
+  ligneDroite(50, true, true);
+  ligneDroite (400, true, false);
+  ligneDroite(90, false, true);
+}
+
+void coteDroit() {
+  ligneDroite(96, true, true);
+  quartDeTour(false);
+  ligneDroite(356, true, true);
+  ligneDroite (400, true, false);
+  ligneDroite(91, false, true);
+  quartDeTour(true);
+  ligneDroite(278, true, true);
+  quartDeTour(false);
+  ligneDroite(50, true, true);
+  ligneDroite (400, true, false);
+  ligneDroite(90, false, true);
+}
 
 void ouvertureDuParasol() {
   servoParasol.writeMicroseconds(800);
@@ -174,15 +179,16 @@ void ouvertureDuParasol() {
 
 }
 
-
-void pingUltrason() {
-  if ((captGauche.get_distance() < 10 || captDroite.get_distance() < 10)) {
-    while ((captGauche.get_distance() < 10 || captDroite.get_distance() < 10)) {
-      digitalWrite (sleepPinGauche, LOW);
-      digitalWrite (sleepPinDroite, LOW);
+void pingCapteurs(bool avance) {
+  if (avance) {
+    while (((captGauche.get_distance() < distSeuil) || (captDroite.get_distance() < distSeuil))) {
+      1 + 1;
     }
   }
-  digitalWrite (sleepPinGauche, HIGH);
-  digitalWrite (sleepPinDroite, HIGH);
+  else {
+    while (captArriere.get_distance() < distSeuil) {
+      1 + 1;
+    }
+  }
 }
 
