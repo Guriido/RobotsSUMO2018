@@ -24,6 +24,9 @@ Capteur_ultrason captGauche(2, 3);
 Capteur_ultrason captDroite (4, 5);
 Capteur_ultrason captArriere (6, 7);
 
+//Duree des steps moteur
+int dureeStep = 6000;
+
 //Declaration du servo moteur du parasol
 Servo servoParasol;
 
@@ -108,10 +111,10 @@ void ligneDroite(int nbrSteps, bool dir, bool capt) { //dir=true => on avance
   for (int i = 0; i < nbrSteps; i++) {
     digitalWrite(stepperPinDroite, HIGH);
     digitalWrite(stepperPinGauche, HIGH);
-    delayMicroseconds(2000);
+    delayMicroseconds(dureeStep);
     digitalWrite(stepperPinDroite, LOW);
     digitalWrite(stepperPinGauche, LOW);
-    delayMicroseconds(2000);
+    delayMicroseconds(dureeStep);
 
     if (capt) {
       if (millis() - decomptCapteur > 300) {
@@ -128,32 +131,32 @@ void quartDeTour(bool sensTrigo) {
   digitalWrite(dirPinDroite, sensTrigo);
   digitalWrite(dirPinGauche, sensTrigo);
   delay(50);
-  for (int i = 0; i < 120; i++) {
+  for (int i = 0; i < 105; i++) {
     digitalWrite(stepperPinDroite, HIGH);
     digitalWrite(stepperPinGauche, HIGH);
-    delayMicroseconds(2000);
+    delayMicroseconds(dureeStep);
     digitalWrite(stepperPinDroite, LOW);
     digitalWrite(stepperPinGauche, LOW);
-    delayMicroseconds(2000);
+    delayMicroseconds(dureeStep);
   }
 }
 
 
 void fermerPorte() {
-  
+
 }
 
 void coteGauche() {
   ligneDroite(96, true, true);
   quartDeTour(true);
   ligneDroite(356, true, true);
-  ligneDroite (400, true, false);
-  ligneDroite(91, false, true);
+  ligneDroite (300, true, false);
+  ligneDroite(150, false, true);
   quartDeTour(false);
   ligneDroite(278, true, true);
   quartDeTour(true);
-  ligneDroite(50, true, true);
-  ligneDroite (400, true, false);
+  ligneDroite(60, true, true);
+  ligneDroite (300, true, false);
   ligneDroite(90, false, true);
 }
 
@@ -161,13 +164,13 @@ void coteDroit() {
   ligneDroite(96, true, true);
   quartDeTour(false);
   ligneDroite(356, true, true);
-  ligneDroite (400, true, false);
-  ligneDroite(91, false, true);
+  ligneDroite (300, true, false);
+  ligneDroite(150, false, true);
   quartDeTour(true);
   ligneDroite(278, true, true);
   quartDeTour(false);
-  ligneDroite(50, true, true);
-  ligneDroite (400, true, false);
+  ligneDroite(60, true, true);
+  ligneDroite (300, true, false);
   ligneDroite(90, false, true);
 }
 
@@ -182,12 +185,26 @@ void ouvertureDuParasol() {
 void pingCapteurs(bool avance) {
   if (avance) {
     while (((captGauche.get_distance() < distSeuil) || (captDroite.get_distance() < distSeuil))) {
-      1 + 1;
+      if (millis() - tempsZero > 91000) {
+        servoParasol.attach(8);
+        ouvertureDuParasol();
+        while (1) {
+          digitalWrite (sleepPinGauche, LOW);
+          digitalWrite (sleepPinDroite, LOW);
+        }
+      }
     }
   }
   else {
     while (captArriere.get_distance() < distSeuil) {
-      1 + 1;
+      if (millis() - tempsZero > 91000) {
+        servoParasol.attach(8);
+        ouvertureDuParasol();
+        while (1) {
+          digitalWrite (sleepPinGauche, LOW);
+          digitalWrite (sleepPinDroite, LOW);
+        }
+      }
     }
   }
 }
