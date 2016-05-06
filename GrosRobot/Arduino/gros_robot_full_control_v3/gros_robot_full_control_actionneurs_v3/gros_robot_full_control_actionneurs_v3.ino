@@ -16,14 +16,14 @@ float lastL = 0.0;
 float lastR = 0.0;
 float lastB = 0.0;
 
-boolean chronoFini = false;
+boolean chronoFini = false, poissonsOff = false;
 
 Servo left;
 Servo right;
 
 char mode = 'f';
 
-boolean obstacle = false;
+boolean obstacle = false, obstacleAR = false, obstacleAV = false;
 boolean waitingStart = true;
 
 char side = 0;
@@ -83,6 +83,10 @@ void loop() {
   case 's' :
     chronoFini = true;
     break;
+    
+  case 'd' :
+    poissonsOff = true;
+  break;
 
   case 'r' : // Lecture du selecteur
     if(digitalRead(53) == HIGH)
@@ -93,15 +97,17 @@ void loop() {
     break;
     
   case 'p' :
-    if(!poissonsDeploye){
+    if(!poissonsDeploye && !poissonsOff){
       deployerPoissons();
+      Serial.println('k');
       poissonsDeploye = true;
     }
     break;
     
   case 'q':
-     if(poissonsDeploye){
+     if(poissonsDeploye && !poissonsOff){
       rangerPoissons();
+      Serial.println('k');
       poissonsDeploye = false;
     }
     break;
@@ -160,9 +166,9 @@ void loop() {
 }
 void pingUltrason() {
   float dL=ultrasonL.get_distance();
-  delayMicroseconds(100);
+  delay(1);
   float dR=ultrasonR.get_distance();
-  delayMicroseconds(100);
+  delay(1);
   float dB=ultrasonB.get_distance();
   
   float meanL = (lastL + dL) / 2.0;
@@ -176,16 +182,29 @@ void pingUltrason() {
   //Serial.println(String((long)(meanL))+" "+String((long)(meanR))+" "+String((long)(meanB)));
   
   
-  if((dL < 25 || dR < 25 || dB < 10)) {
-    if(!obstacle){
+  if( ((mode == 'o') && (meanL < 20 || meanR < 20)) ||  ((mode == 'f') && (meanL < 10 || meanR < 10)) ){
+    if(!obstacleAV){
       Serial.print('x');
-      obstacle = true;
+      obstacleAV = true;
     }
   }
   else{
-    if(obstacle){
+    if(obstacleAV){
       Serial.print('o');
-      obstacle = false;
+      obstacleAV = false;
+    }
+  }
+  
+  if(meanB < 15) {
+    if(!obstacleAR){
+      Serial.print('y');
+      obstacleAR = true;
+    }
+  }
+  else{
+    if(obstacleAR){
+      Serial.print('p');
+      obstacleAR = false;
     }
   }
 }

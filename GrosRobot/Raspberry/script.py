@@ -9,7 +9,7 @@ mutexBR = Lock()
 
 start = Event()
 numConfigOK = Event()
-
+fishOK = Event()
 
 # IMPORTANT : ardBR et ardAC sont des liens symboliques dans /dev
 # qui pointent vers les bonnes Arduino. La selection se fait par le numero
@@ -19,6 +19,10 @@ serBR = serial.Serial('/dev/ardBR', 115200)
 serAC = serial.Serial('/dev/ardAC', 115200, timeout=0.1)
 
 
+def disableFish():
+    with mutexAC:
+	serAC.write('d')
+    print "Canne a peche desactivee"
 
 def stopEverything():
     with mutexAC:
@@ -35,17 +39,33 @@ class ArduinoAC(Thread):
 	self.end = False
 	self.configPalets = 1
 	self.side = 'g'
+	self.obstacleSignalWaiting = False
+	self.obstacleSignal = ''
 
     def run(self):
 	
 	while(not self.end):
+
+	    if (not mutexBR.locked()) and self.obstacleSignalWaiting :
+		with mutexBR:
+		    if start.isSet():
+		    	serBR.write('b' + self.obstacleSignal + '         e')
+		self.obstacleSignal = ''
+		self.obstacleSignalWaiting = False
+
 	    with mutexAC:
 	        c = serAC.read(1)
 	        
-                if(c == 'x' or c == 'o'):
-                    with mutexBR:
-                        serBR.write('b' + c + '         e')
-                        print 'OBSTACLE : ' + c
+                if(c in 'xyop' and c != ''):
+                    self.obstacleSignal = c
+	            self.obstacleSignalWaiting = True
+                    print 'OBSTACLE : ' + c
+
+		elif(c == 'D'):
+		    print 'DEBUG'
+
+		elif(c == 'k'):
+		    fishOK.set()
 
                 elif(c == 'm'):
                     start.set()
@@ -54,8 +74,7 @@ class ArduinoAC(Thread):
                     c = serAC.read(1)
                     self.side = c
                     numConfigOK.set()
-
-                time.sleep(0.1)
+	    time.sleep(0.1)
 
     def quit(self):
 	self.end = True
@@ -84,7 +103,7 @@ numConfigOK.wait(5)
 print arduinoAC.configPalets
 print arduinoAC.side
  
-pack = pickle.load(open('waypoints.txt','r'))
+pack = pickle.load(open('waypoints' + str(arduinoAC.configPalets) + arduinoAC.side + '.txt','r'))
 waypoints = pack[1]
 
 rX,rY = waypoints[0][:2]
@@ -100,11 +119,15 @@ cmdAC = ['f','t','o']
 
 poissonsDeploye = False
 
-
+print "Ready"
 start.wait()
 
-timer = Timer(90.0, stopEverything)
+timer = Timer(87.0, stopEverything)
+timerFish = Timer(70.0, disableFish)
+
 timer.start()
+timerFish.start()
+
 
 try:
 
@@ -142,9 +165,13 @@ try:
         if f == 1 and not poissonsDeploye :
             arduinoAC.write('p')
             poissonsDeploye = True
+	    fishOK.wait(17)
+	    fishOK.clear()
         elif f == 0 and poissonsDeploye :
             arduinoAC.write('q')
             poissonsDeploye = False
+	    fishOK.wait(17)
+	    fishOK.clear()
         
         rX,rY = x,y
         rAngle += angle

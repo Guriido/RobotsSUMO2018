@@ -183,9 +183,11 @@ class Map(Widget):
             self.putRobotBeginning()
         elif keycode[1] == 's':
             pack = [self.side, self.waypoints]
-            pickle.dump(pack, open("waypoints.txt", "w"))
+            pickle.dump(pack, open("waypoints" + self.side + ".txt", "w"))
+            
         elif keycode[1] == 'l':
-            pack = pickle.load(open("waypoints.txt", "r"))
+            pack = pickle.load(open("waypoints" + self.side + ".txt", "r"))
+
             self.side = pack[0]
             self.waypoints = pack[1]
         elif keycode[1] == 'd':
@@ -193,11 +195,6 @@ class Map(Widget):
                 del self.waypoints[-1]
                 if len(self.waypoints) == 1 or self.progress > self.getTotalLength(len(self.waypoints)):
                     self.putRobotOnLastWaypoint()
-        elif keycode[1] == 'g':
-            if self.side == 'g':
-                self.side = 'd'
-            else:
-                self.side = 'g'
         elif keycode[1] == 't':
             self.armMode = (self.armMode + 1) % 3
             if(len(self.waypoints) > 0):

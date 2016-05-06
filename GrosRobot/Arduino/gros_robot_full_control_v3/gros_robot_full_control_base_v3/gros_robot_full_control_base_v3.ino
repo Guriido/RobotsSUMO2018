@@ -11,6 +11,7 @@ enum Mode {
   WAITING, ROT, LIN, AVOID };
 
 //SimpleTimer timerDebug;
+SimpleTimer timerAsser;
 
 
 MotorBlock M_L(12,9,3, 21, 7);
@@ -30,6 +31,10 @@ boolean reading = false;
 int i = 0;
 boolean cmdAvailable = false;
 
+enum AvoidMode { FRONT, BACK};
+AvoidMode avoidMode = FRONT;
+float distAtAvoid = 0.0;
+
 
 void setup() {
   M_L.init();
@@ -38,21 +43,23 @@ void setup() {
   attachInterrupt(2, coderL, CHANGE);
   attachInterrupt(0, coderR, CHANGE);
   Serial.begin(115200);
-  //timerDebug.setInterval(200, serialDebug);
+  //timerDebug.setInterval(100, serialDebug);
+  timerAsser.setInterval(20, asser);
 
 }
 
 void loop() {
 
   //timerDebug.run();
+  timerAsser.run();
   boolean rotDone = false, linDone = false, avoidDone = false;
 
   readSerial();
 
   if(cmdAvailable && tempBuffer[0] == 's') {
     finChrono = true;
-    M_L.brake();
-    M_R.brake();
+    M_L.setSpeed(0);
+    M_R.setSpeed(0);
     cmdAvailable = false;
   }
 
@@ -67,8 +74,6 @@ void loop() {
 
         if(ok) {
           mode = ROT;
-          M_L.unbrake();
-          M_R.unbrake();
         }
         cmdAvailable = false;    
       }
@@ -95,16 +100,23 @@ void loop() {
 
         cmdAvailable = false;
 
-        if(tempBuffer[0] == 'x'){
+        if(tempBuffer[0] == 'x' && linDir == 1){
           mode = AVOID;
-          M_L.brake();
-          M_R.brake();
+          distAtAvoid = abs( (M_R.encoderPos - M_L.encoderPos)) / 2.0;
+          avoidMode = FRONT;
+          M_L.setSpeed(0);
+          M_R.setSpeed(0);
           delay(500);
-          M_L.unbrake();
-          M_R.unbrake();
+          break;
+        }else if(tempBuffer[0] == 'y' && linDir == -1){
+          mode = AVOID;
+          distAtAvoid = abs( (M_R.encoderPos - M_L.encoderPos)) / 2.0;
+          avoidMode = BACK;
+          M_L.setSpeed(0);
+          M_R.setSpeed(0);
+          delay(500);
           break;
         }
-
 
       }
       linDone = linCommand();
@@ -120,31 +132,53 @@ void loop() {
 
 
     case AVOID :
-      cmdAvailable = false;
-      avoidDone = avoidCommand();
+      if(avoidMode == FRONT){
+          
+        avoidDone = avoidCommand();
 
-      if(avoidDone) {
-        M_L.encoderPos = 0;
-        M_R.encoderPos = 0;
-        mode = LIN;
+        if(avoidDone || (cmdAvailable && tempBuffer[0] == 'o')) {
+          M_L.encoderPos = 0;
+          M_R.encoderPos = 0;
+          mode = LIN;
+          cmdAvailable = false;
+        }
+      
+      }else if(avoidMode == BACK){
+          
+        avoidDone = avoidCommand();
+
+        if(avoidDone || (cmdAvailable && tempBuffer[0] == 'p')) {
+          M_L.encoderPos = 0;
+          M_R.encoderPos = 0;
+          mode = LIN;
+          cmdAvailable = false;
+        }
+        
       }
-
       break;
 
     default:
       break;
     }
+  }else{
+    M_L.setSpeed(0);
+    M_R.setSpeed(0);
   }
 }
 
 
+void asser(){
+  
+  M_L.run();
+  M_R.run();
 
+}
 
 
 void serialDebug()
 {
-  //Serial.println(String(M_L.encoderPos) + " " + String(M_R.encoderPos));
-  Serial.println(String((int)M_L.cmdDEBUG));
+  Serial.println(String((int)(1000*M_L.currSpeed)) + "/" + String((int)(1000*M_L.targetSpeed)) + " " + String((int)(1000*M_R.currSpeed)) + "/" + String((int)(1000*M_R.targetSpeed)));
+  //Serial.println(String((int)M_L.cmdDEBUG));
 }
 
 
