@@ -65,7 +65,7 @@ void initPoissons(){
   servoSortie.attach(PIN_POISSONS_SORTIE);
   servoSortie.write(40);
   servoBase.attach(PIN_POISSONS_BASE);
-  servoBase.write(110);
+  servoBase.write(85);
   pinMode(PIN_POISSONS_AIMANTS_1, OUTPUT);
   pinMode(PIN_POISSONS_AIMANTS_2, OUTPUT);
   pinMode(PIN_POISSONS_AIMANTS_PWM, OUTPUT);
@@ -82,17 +82,17 @@ void deployerPoissons(){
   commandeServo(servoSortie, 40, 140, 20);
   
   // Descente cable
-  moteurCable(-1, 3500, 200);
+  moteurCable(-1, 3000, 200);
   
   // Balayage
   for(int i = 0 ; i < 3 ; i++){
-    commandeServo(servoBase, 110, 160, 10);
-    commandeServo(servoBase, 160, 70, 10);
-    commandeServo(servoBase, 70, 110, 10);
+    commandeServo(servoBase, 85, 165, 10);
+    commandeServo(servoBase, 165, 5, 10);
+    commandeServo(servoBase, 5, 85, 10);
   }
   
   // Remontee cable
-  moteurCable(1, 3500, 200);
+  moteurCable(1, 3000, 200);
   moteurCable(1, 1200, 150);
   
   

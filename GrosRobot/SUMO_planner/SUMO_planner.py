@@ -13,10 +13,10 @@ from kivy.config import Config
 Config.set('graphics', 'resizable', '0')
 Config.write()
 
-IMG_W = 657
-IMG_H = 437
-DX = 50.0
-DY = 50.0
+IMG_W = 884
+IMG_H = 588
+DX = 25.0
+DY = 25.0
 
 INI_X = 2760
 INI_Y = 1000

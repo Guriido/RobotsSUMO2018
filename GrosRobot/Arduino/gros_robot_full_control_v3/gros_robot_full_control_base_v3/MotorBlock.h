@@ -11,6 +11,9 @@ class MotorBlock
     void run();
     void coderInterrupt();
     void setSpeed(double targetSpeedRequired);
+    void setKv(float requiredKv);
+    void setK(float requiredK);
+    void addToKv(float delta);
     
     volatile long encoderPos;
     volatile long nbTopsDone;
@@ -22,6 +25,9 @@ class MotorBlock
     double targetSpeed;
     
     float cmdDEBUG;
+    float offset;
+    float Kv;
+    float K;
     
   private:
     int D;

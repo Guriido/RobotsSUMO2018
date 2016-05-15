@@ -18,6 +18,13 @@ fishOK = Event()
 serBR = serial.Serial('/dev/ardBR', 115200)
 serAC = serial.Serial('/dev/ardAC', 115200, timeout=0.1)
 
+time.sleep(5)
+
+
+
+while(serBR.inWaiting() != 0):
+    serBR.read(1)
+
 
 def disableFish():
     with mutexAC:
@@ -47,8 +54,8 @@ class ArduinoAC(Thread):
 	while(not self.end):
 
 	    if (not mutexBR.locked()) and self.obstacleSignalWaiting :
-		with mutexBR:
-		    if start.isSet():
+		if start.isSet():
+		    with mutexBR:
 		    	serBR.write('b' + self.obstacleSignal + '         e')
 		self.obstacleSignal = ''
 		self.obstacleSignalWaiting = False
@@ -95,13 +102,26 @@ def normalizeAngle(angle):
 
 arduinoAC = ArduinoAC()
 arduinoAC.start()
-time.sleep(3)
+
 
 arduinoAC.write('r') # On demande la config des palets
 
 numConfigOK.wait(5)
 print arduinoAC.configPalets
 print arduinoAC.side
+
+
+with mutexBR:
+    serBR.write('brrrrrrrrrre')
+    time.sleep(1)
+    print 'Ard moteur vivante ?'
+    while True:
+	c = serBR.read(1)
+    	if(c == 'a'):
+	    print "Arduino moteur vivante !"
+	    break
+    
+
  
 pack = pickle.load(open('waypoints' + str(arduinoAC.configPalets) + arduinoAC.side + '.txt','r'))
 waypoints = pack[1]
@@ -150,27 +170,28 @@ try:
         strAngle = format(int(1000*angle),'05')
         strDistance = format(int(distance),'05')
 
-        print "Envoi " + str(angle) + " " + str(distance) + " -> " + strAngle + " " + strDistance
 
         msg = 'b' + strAngle + strDistance + 'e'
         with mutexBR:
+		print "Envoi " + str(angle) + " " + str(distance) + " -> " + strAngle + " " + strDistance
 		serBR.write(msg)
         time.sleep(1)
 
-        while True:
-            c = serBR.read(1)
-            if(c == 'k'):
-	        break
+	with mutexBR:
+	    while True:
+            	c = serBR.read(1)
+            	if(c == 'k'):
+	            break
             
         if f == 1 and not poissonsDeploye :
             arduinoAC.write('p')
             poissonsDeploye = True
-	    fishOK.wait(17)
+	    fishOK.wait()
 	    fishOK.clear()
         elif f == 0 and poissonsDeploye :
             arduinoAC.write('q')
             poissonsDeploye = False
-	    fishOK.wait(17)
+	    fishOK.wait()
 	    fishOK.clear()
         
         rX,rY = x,y
@@ -182,9 +203,14 @@ finally:
     arduinoAC.quit()
     arduinoAC.join()
     print 'Clean exit'
+    timer.cancel()
+    timerFish.cancel()
     
 	
 arduinoAC.quit()
 arduinoAC.join()
+
+timer.cancel()
+timerFish.cancel()
 
 print "Fin"
